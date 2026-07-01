@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BRISPOT">
+<meta name="theme-color" content="#00529C">
+<title>BRISPOT — Smart Worklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bri-blue:#00529C;
+  --bri-dark:#003F75;
+  --bri-orange:#F15A23;
+  --bg:#F4F7FA;
+  --card:#FFFFFF;
+  --text:#1C2434;
+  --sub:#64748B;
+  --line:#E2E8F0;
+  --paper:#F8FAFC;
+  --r-bg:#FEE2E2;--r-tx:#DC2626;
+  --y-bg:#FEF3C7;--y-tx:#D97706;
+  --g-bg:#D1FAE5;--g-tx:#059669;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+body{background:#111827;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+
+/* ====== PHONE FRAME ====== */
+.phone{
+  width:412px;height:860px;
+  background:var(--bg);
+  border-radius:40px;
+  box-shadow:0 32px 64px -16px rgba(0,0,0,.7);
+  border:12px solid #374151;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.notch{
+  width:140px;height:26px;
+  background:#374151;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  border-bottom-left-radius:15px;border-bottom-right-radius:15px;
+  z-index:9999;pointer-events:none;
+}
+
+/* ====== PAGES ====== */
+.page{width:100%;height:100%;display:none;flex-direction:column;position:absolute;top:0;left:0;}
+.page.active{display:flex;}
+
+/* ====== HEADER ====== */
+.app-header{
+  background:linear-gradient(135deg,var(--bri-blue) 0%,var(--bri-dark) 100%);
+  color:#fff;padding:36px 18px 18px;
+}
+.header-row{display:flex;align-items:center;justify-content:space-between;}
+.header-row-back{display:flex;align-items:center;gap:10px;}
+.h-title{font-size:17px;font-weight:700;margin-bottom:2px;}
+.h-sub{font-size:11px;color:#93C5FD;}
+.btn-back{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+.btn-icon{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+.rm-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+.rm-chip{display:flex;align-items:center;gap:8px;}
+.rm-av{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;border:1px solid rgba(255,255,255,.22);}
+.rm-av2{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.rm-name{font-size:12px;font-weight:600;}
+.rm-role{font-size:10px;color:#93C5FD;}
+
+/* ====== SCROLLABLE CONTENT ====== */
+.page-content{flex:1;overflow-y:auto;padding:14px;}
+.page-content::-webkit-scrollbar{width:0;}
+
+/* ====== BOTTOM NAV ====== */
+.bot-nav{background:#fff;border-top:1px solid var(--line);padding:10px 12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.btn-nav{background:var(--paper);border:1px solid var(--line);color:var(--bri-blue);padding:8px 12px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;}
+.btn-nav.orange{background:var(--bri-orange);color:#fff;border-color:var(--bri-orange);}
+.nav-tabs{display:flex;gap:0;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 8px;border-radius:8px;cursor:pointer;color:var(--sub);}
+.nav-tab.on{color:var(--bri-blue);background:#EEF4FF;}
+.nav-tab svg{width:18px;height:18px;}
+.nav-tab span{font-size:9.5px;font-weight:600;}
+
+/* ====== BLOCKER PAGE ====== */
+#page-blocker{background:rgba(15,23,42,.97);z-index:500;color:#fff;padding:36px 22px 22px;justify-content:center;align-items:center;text-align:center;}
+.blk-icon{font-size:46px;margin-bottom:14px;}
+.blk-title{font-size:19px;font-weight:700;margin-bottom:8px;}
+.blk-desc{font-size:12.5px;color:#94A3B8;margin-bottom:22px;line-height:1.6;}
+.blk-box{background:#1E293B;border:1px solid #334155;border-radius:14px;padding:14px;width:100%;margin-bottom:6px;text-align:left;}
+.blk-lbl{font-size:10.5px;font-weight:700;color:#38BDF8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+.blk-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#E2E8F0;padding:7px 0;border-bottom:1px solid #334155;}
+.blk-item:last-child{border-bottom:none;}
+.blk-item .bchk{width:22px;height:22px;border-radius:6px;border:1.5px solid #475569;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;cursor:pointer;}
+.blk-item .bchk.done{background:#059669;border-color:#059669;}
+.blk-item .bi{flex:1;min-width:0;}
+.blk-item .bi b{display:block;font-size:12px;}
+.blk-item .bi small{font-size:10px;color:#94A3B8;font-family:monospace;}
+.blk-prog-wrap{margin:14px 0 6px;background:#0F172A;border-radius:8px;height:7px;overflow:hidden;}
+.blk-prog{height:100%;background:linear-gradient(90deg,#EF4444,#F59E0B);border-radius:8px;transition:.4s;}
+.blk-prog-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:#94A3B8;margin-bottom:18px;}
+.btn-blk{width:100%;padding:13px;border:none;border-radius:10px;background:var(--bri-orange);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;}
+.btn-blk.lock{background:#334155;cursor:default;}
+
+/* ====== MATRIX CARDS ====== */
+.section-lbl{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.mtile{background:#fff;border-radius:12px;padding:10px 6px;text-align:center;border:2px solid var(--line);cursor:pointer;transition:.15s;}
+.mtile:active{transform:scale(.97);}
+.mtile.active-r{border-color:#EF4444;background:#FEF2F2;}
+.mtile.active-y{border-color:#F59E0B;background:#FFFBEB;}
+.mtile.active-g{border-color:#10B981;background:#F0FDF4;}
+.mtile .mn{font-size:20px;font-weight:800;}
+.mtile .ml{font-size:9.5px;font-weight:600;color:var(--sub);margin-top:3px;}
+
+/* ====== ACTION BAR ====== */
+.action-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 0 10px;}
+.sel-all{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;cursor:pointer;}
+.sel-all input{width:16px;height:16px;accent-color:var(--bri-blue);}
+.btn-bulk{display:flex;align-items:center;gap:5px;background:#25D366;color:#fff;border:none;padding:7px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 3px 8px -2px rgba(37,211,102,.5);}
+
+/* ====== FILTER CHIPS ====== */
+.chips{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;}
+.chip{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--sub);cursor:pointer;}
+.chip.on{background:var(--text);color:#fff;border-color:var(--text);}
+
+/* ====== DEBITUR CARD ====== */
+.deb-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px -2px rgba(0,0,0,.04);border-left:5px solid transparent;}
+.deb-card.r{border-left-color:#EF4444;}
+.deb-card.y{border-left-color:#F59E0B;}
+.deb-card.g{border-left-color:#10B981;}
+.deb-card.cleared{opacity:.5;}
+
+.dc-top{display:flex;gap:8px;align-items:flex-start;}
+.dc-chk{width:17px;height:17px;accent-color:var(--bri-blue);margin-top:3px;flex-shrink:0;cursor:pointer;}
+.dc-av{width:34px;height:34px;border-radius:8px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--sub);flex-shrink:0;}
+.dc-info{flex:1;min-width:0;cursor:pointer;}
+.dc-name{font-size:13px;font-weight:700;color:var(--text);}
+.dc-sub{font-size:10px;color:var(--sub);margin-top:3px;line-height:1.6;}
+.dc-sub b{color:var(--text);font-weight:600;}
+.badge{font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;}
+.badge.r{background:var(--r-bg);color:var(--r-tx);}
+.badge.y{background:var(--y-bg);color:var(--y-tx);}
+.badge.g{background:var(--g-bg);color:var(--g-tx);}
+
+.dc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;background:var(--paper);border-radius:10px;padding:9px;margin-top:10px;cursor:pointer;}
+.dc-metric .k{font-size:9.5px;color:var(--sub);}
+.dc-metric .v{font-size:12px;font-weight:700;color:var(--text);margin-top:2px;}
+
+.dc-saldo{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:8px;margin-top:8px;cursor:pointer;}
+.ds-left .sl{font-size:10px;color:var(--sub);}
+.ds-left .sv{font-size:12px;font-weight:700;margin-top:2px;}
+.sv.ok{color:#059669;}
+.sv.bad{color:#DC2626;}
+.ds-right{text-align:right;}
+.ds-right .dl{font-size:9.5px;color:var(--sub);}
+.ds-right .dv{font-size:12px;font-weight:700;margin-top:2px;}
+.dv.ok{color:#059669;}
+.dv.bad{color:#DC2626;}
+
+.dc-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;}
+.pill{font-size:9px;padding:3px 7px;border-radius:5px;font-weight:600;}
+.pill.danger{background:var(--r-bg);color:#991B1B;border:1px solid #FEE2E2;}
+.pill.warn{background:var(--y-bg);color:#92400E;border:1px solid var(--y-bg);}
+.pill.ok{background:var(--g-bg);color:#065F46;border:1px solid #A7F3D0;}
+.pill.neutral{background:var(--paper);color:#475569;border:1px solid var(--line);}
+
+.dc-btns{display:flex;gap:7px;margin-top:10px;}
+.btn-det{flex:1;padding:9px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:11.5px;font-weight:600;color:var(--text);cursor:pointer;}
+.btn-wa{flex:1;padding:9px;border-radius:8px;border:1px solid #25D366;background:#fff;font-size:11.5px;font-weight:600;color:#25D366;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-wa.done{background:var(--g-bg);border-color:transparent;color:#059669;}
+
+/* ====== DETAIL PAGE ====== */
+.id-card{background:#fff;border-radius:12px;border:1px solid var(--line);padding:12px;margin-bottom:14px;}
+.id-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--paper);font-size:12px;}
+.id-row:last-child{border-bottom:none;}
+.id-k{color:var(--sub);}
+.id-v{font-weight:600;color:var(--text);text-align:right;max-width:60%;}
+
+.risk-band{border-radius:12px;padding:12px 13px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.risk-band.r{background:var(--r-bg);}
+.risk-band.y{background:var(--y-bg);}
+.risk-band.g{background:var(--g-bg);}
+.rb-ic{font-size:18px;}
+.rb-title{font-size:13px;font-weight:700;}
+.rb-sub{font-size:10.5px;margin-top:1px;opacity:.75;}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.ig-cell{background:var(--paper);border-radius:10px;padding:10px 11px;}
+.ig-cell .k{font-size:9.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;}
+.ig-cell .v{font-size:14px;font-weight:700;margin-top:3px;}
+
+.saldo-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:12px;}
+.sp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sp-label{font-size:10.5px;color:var(--sub);}
+.sp-amt{font-size:17px;font-weight:800;}
+.sp-amt.ok{color:#059669;}
+.sp-amt.bad{color:#DC2626;}
+.sp-pill{font-size:9.5px;font-weight:700;padding:4px 9px;border-radius:8px;}
+.sp-pill.ok{background:var(--g-bg);color:#059669;}
+.sp-pill.bad{background:var(--r-bg);color:#DC2626;}
+.sp-delta{display:flex;justify-content:space-between;border-top:1px dashed var(--line);padding-top:9px;font-size:12px;}
+.sp-dv{font-weight:700;}
+.sp-dv.ok{color:#059669;}
+.sp-dv.bad{color:#DC2626;}
+
+.sec-title{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 7px;}
+
+.tl-box{background:#fff;border-radius:12px;border:1px solid var(--line);padding:13px;}
+.tl-item{border-left:2px solid var(--line);padding-left:13px;position:relative;padding-bottom:13px;}
+.tl-item:last-child{padding-bottom:0;border-left:2px solid transparent;}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:var(--bri-blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--bri-blue);position:absolute;left:-6px;top:2px;}
+.tl-dot.done{background:#059669;box-shadow:0 0 0 2px #059669;}
+.tl-dot.next{background:#F59E0B;box-shadow:0 0 0 2px #F59E0B;}
+.tl-dot.todo{background:#E2E8F0;box-shadow:0 0 0 2px #CBD5E1;}
+.tl-time{font-size:9.5px;color:var(--sub);font-weight:600;}
+.tl-name{font-size:12px;font-weight:700;color:var(--text);margin-top:1px;}
+.tl-desc{font-size:11px;color:var(--sub);margin-top:1px;}
+
+/* ====== ACTION PAGE ====== */
+.wa-prev{background:#E5DDD5;border-radius:12px;padding:11px;margin-bottom:12px;}
+.wa-bubble{background:#DCF8C6;padding:11px;border-radius:9px;font-size:12px;color:#303030;line-height:1.5;}
+.wa-time{text-align:right;font-size:9.5px;color:#94A3B8;margin-top:5px;}
+
+.log-box{border-radius:12px;padding:13px 14px;margin-bottom:10px;border:1px solid var(--line);background:#fff;}
+.log-box.sent{background:#F0FDF4;border-color:#10B981;}
+.log-sent-badge{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#059669;margin-bottom:8px;}
+.log-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:4px 0;border-bottom:1px dashed var(--line);}
+.log-row:last-child{border-bottom:none;}
+.log-row .lk{color:var(--sub);}
+.log-row .lv{font-weight:700;color:var(--text);font-family:monospace;font-size:10.5px;}
+
+.status-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px;}
+.sopt{padding:10px 8px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;text-align:center;transition:.15s;line-height:1.4;}
+.sopt:active{transform:scale(.97);}
+.sopt.sel-green{border-color:#059669;background:#F0FDF4;color:#059669;}
+.sopt.sel-yellow{border-color:#D97706;background:#FFFBEB;color:#D97706;}
+.sopt.sel-red{border-color:#DC2626;background:#FEF2F2;color:#DC2626;}
+.sopt.sel-blue{border-color:#00529C;background:#EEF4FF;color:#00529C;}
+
+.btn-submit{width:100%;padding:13px;border:none;border-radius:10px;background:#94A3B8;color:#fff;font-weight:700;font-size:13.5px;cursor:not-allowed;margin-top:14px;transition:.2s;}
+.btn-submit.ready{background:var(--bri-orange);cursor:pointer;}
+.btn-submit.done-btn{background:#059669;cursor:default;}
+
+/* ====== SBM PAGE ====== */
+#page-sbm .app-header{background:linear-gradient(135deg,#1E293B,#0F172A);}
+.sbm-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.sbm-kpi-card{background:#fff;border-radius:12px;padding:12px;border:1px solid var(--line);}
+.sbm-kpi-card .kv{font-size:22px;font-weight:800;color:var(--bri-blue);}
+.sbm-kpi-card .kl{font-size:10px;color:var(--sub);margin-top:2px;}
+.sbm-kpi-card .kv.red{color:#DC2626;}
+.sbm-kpi-card .kv.green{color:#059669;}
+
+.coll{background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden;margin-bottom:8px;}
+.coll-h{padding:13px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.coll-name{font-size:13px;font-weight:700;color:var(--text);}
+.coll-sub{font-size:10.5px;color:var(--sub);margin-top:1px;}
+.coll-arr{font-size:11px;color:var(--sub);transition:.2s;}
+.coll.open .coll-arr{transform:rotate(180deg);}
+.coll-body{display:none;padding:0 14px 12px;border-top:1px solid var(--paper);}
+.coll.open .coll-body{display:block;}
+.coll-task{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;border-bottom:1px dashed var(--line);}
+.coll-task:last-child{border-bottom:none;}
+.pbar{width:100%;height:5px;background:var(--paper);border-radius:3px;overflow:hidden;margin-top:5px;}
+.pbar-fill{height:100%;border-radius:3px;transition:.4s;}
+
+/* ====== WA MODAL ====== */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;}
+.modal-bg.show{display:flex;}
+.wa-modal{background:#ECE5DD;width:100%;border-radius:20px 20px 0 0;overflow:hidden;animation:sup .25s ease;}
+@keyframes sup{from{transform:translateY(50px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.wa-mh{background:#075E54;color:#fff;padding:13px 15px;display:flex;align-items:center;gap:10px;}
+.wa-mav{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.wa-mn{font-size:13px;font-weight:700;}
+.wa-ms{font-size:9.5px;opacity:.7;}
+.wa-mb{padding:18px 13px;}
+.wa-mf{background:#F0F0F0;padding:10px 14px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #ddd;}
+.btn-wac{background:#E0E0E0;border:none;padding:9px 15px;border-radius:16px;font-size:11.5px;font-weight:700;color:#444;cursor:pointer;}
+.btn-was{background:#075E54;color:#fff;border:none;padding:9px 16px;border-radius:16px;font-size:11.5px;font-weight:700;cursor:pointer;}
+
+/* ====== TOAST ====== */
+.toast{position:absolute;bottom:80px;left:50%;transform:translate(-50%,20px);background:#1E293B;color:#fff;padding:10px 16px;border-radius:20px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:7px;box-shadow:0 6px 16px -4px rgba(0,0,0,.4);opacity:0;transition:.3s;z-index:300;white-space:nowrap;max-width:90%;text-align:center;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- ====== PAGE: BLOCKER ====== -->
+  <div class="page active" id="page-blocker">
+    <div style="flex:1;overflow-y:auto;padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="width:100%;display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button onclick="closeBlocker()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#94A3B8;width:30px;height:30px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      <div class="blk-icon">🔔</div>
+      <div class="blk-title">Pengingat Pagi — Worklist Kritis</div>
+      <div class="blk-desc">Selamat pagi! Terdapat debitur kategori <b>MERAH (Risiko Tinggi)</b> yang perlu ditindaklanjuti hari ini. Anda tetap dapat menutup notifikasi ini dan mengakses menu lainnya.</div>
+
+      <div class="blk-box" style="width:100%;">
+        <div class="blk-lbl">Daftar Kerja Kritis Hari Ini</div>
+        <div id="blk-list"></div>
+        <div class="blk-prog-wrap"><div class="blk-prog" id="blk-prog-bar" style="width:0%"></div></div>
+        <div class="blk-prog-lbl"><span id="blk-prog-lbl">0 / 4 selesai</span><span>Target: hari ini</span></div>
+      </div>
+      <div style="display:flex;gap:10px;width:100%;">
+        <button onclick="closeBlocker()" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#94A3B8;font-weight:600;font-size:13px;cursor:pointer;">Tutup Notifikasi</button>
+        <button class="btn-blk" id="btn-blk-cta" onclick="tryUnlock()" style="flex:2;">Buka Worklist Kritis →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: MAIN RM ====== -->
+  <div class="page" id="page-main">
+    <div class="app-header">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Smart Worklist Monitoring</div>
+          <div class="h-sub">EWS Portofolio Kredit • BO Tangerang Ahmad Yani</div>
+        </div>
+        <div class="btn-icon" onclick="navTo('page-sbm')">📊</div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-chip">
+          <div class="rm-av">LA</div>
+          <div><div class="rm-name">Lutfiah Amelia P.</div><div class="rm-role">Relationship Manager</div></div>
+        </div>
+        <div style="font-size:10.5px;color:#93C5FD;">Juli 2026</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-lbl">Filter Ring Prioritas (Matrix Scoring)</div>
+      <div class="matrix">
+        <div class="mtile active-r" id="tile-r" onclick="toggleRiskFilter('r')">
+          <div class="mn" style="color:#DC2626" id="cnt-r">4</div>
+          <div class="ml">🔴 MERAH</div>
+        </div>
+        <div class="mtile" id="tile-y" onclick="toggleRiskFilter('y')">
+          <div class="mn" style="color:#D97706" id="cnt-y">5</div>
+          <div class="ml">🟡 KUNING</div>
+        </div>
+        <div class="mtile" id="tile-g" onclick="toggleRiskFilter('g')">
+          <div class="mn" style="color:#10B981" id="cnt-g">3</div>
+          <div class="ml">🟢 HIJAU</div>
+        </div>
+      </div>
+
+      <div class="chips">
+        <div class="chip on" id="chip-all" onclick="setStatusF('all')">Semua</div>
+        <div class="chip" id="chip-pending" onclick="setStatusF('pending')">Belum Ditindaklanjuti</div>
+        <div class="chip" id="chip-done" onclick="setStatusF('done')">Selesai</div>
+      </div>
+
+      <div class="action-bar">
+        <label class="sel-all">
+          <input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)"> Pilih Semua Rekening
+        </label>
+        <button class="btn-bulk" onclick="bulkWA()">💬 Reminder Paralel</button>
+      </div>
+
+      <div id="deb-list"></div>
+      <div id="empty-msg" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--sub);">Tidak ada debitur pada filter ini.</div>
+    </div>
+
+    <div class="bot-nav">
+      <div style="font-size:10.5px;color:var(--sub);">Login: <b>RM Amel</b></div>
+      <button class="btn-nav orange" onclick="navTo('page-sbm')">Dashboard SBM ➔</button>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: DETAIL ====== -->
+  <div class="page" id="page-detail">
+    <div class="app-header">
+      <div class="header-row-back">
+        <button class="btn-back" onclick="navTo('page-main')">❮</button>
+        <div>
+          <div class="h-title" id="det-title">Detail Debitur</div>
+          <div class="h-sub">Rekam Jejak & Digital Audit Trail</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <div class="sec-title">Identitas Debitur</div>
+      <div class="id-card">
+        <div class="id-row"><span class="id-k">No. Rek Pinjaman</span><span class="id-v" id="det-norek">—</span></div>
+        <div class="id-row"><span class="id-k">CIF</span><span class="id-v" id="det-cif">—</span></div>
+        <div class="id-row"><span class="id-k">Nama Debitur</span><span class="id-v" id="det-nama">—</span></div>
+        <div class="id-row"><span class="id-k">Jenis Usaha</span><span class="id-v" id="det-usaha">—</span></div>
+        <div class="id-row"><span class="id-k">Alamat</span><span class="id-v" id="det-alamat">—</span></div>
+      </div>
+
+      <div class="risk-band r" id="det-riskband">
+        <div class="rb-ic" id="det-rbic">🔴</div>
+        <div><div class="rb-title" id="det-rbtitle">Risiko Tinggi</div><div class="rb-sub" id="det-rbsub">—</div></div>
+      </div>
+
+      <div class="sec-title">Data Finansial Pokok</div>
+      <div class="info-grid">
+        <div class="ig-cell"><div class="k">Plafond</div><div class="v" id="det-plafond">—</div></div>
+        <div class="ig-cell"><div class="k">Outstanding</div><div class="v" id="det-outstanding">—</div></div>
+        <div class="ig-cell"><div class="k">Angsuran / bln</div><div class="v" id="det-amt">—</div></div>
+        <div class="ig-cell"><div class="k">Jatuh Tempo</div><div class="v" id="det-tempo">—</div></div>
+      </div>
+
+      <div class="sec-title">Kondisi Saldo Simpanan</div>
+      <div class="saldo-panel">
+        <div class="sp-top">
+          <div><div class="sp-label">Saldo Simpanan</div><div class="sp-amt" id="det-saldo">—</div></div>
+          <div class="sp-pill" id="det-saldo-pill">—</div>
+        </div>
+        <div class="sp-delta">
+          <span id="det-delta-lbl" style="color:var(--sub);font-size:12px;">Selisih (Δ) thd angsuran</span>
+          <span class="sp-dv" id="det-delta-val">—</span>
+        </div>
+      </div>
+
+      <div class="sec-title">Parameter Risiko Terdeteksi</div>
+      <div class="dc-pills" id="det-pills" style="margin-bottom:12px;"></div>
+
+      <div class="sec-title">Rencana Eksekusi</div>
+      <div class="tl-box" id="det-timeline"></div>
+
+      <div class="sec-title">Kirim Reminder</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn-det" style="flex:1;" onclick="logContact('telepon')">📞 Telepon</button>
+        <button class="btn-wa" style="flex:1;" onclick="logContact('whatsapp')">💬 Kirim WA</button>
+        <button class="btn-det" style="flex:1;" onclick="logContact('kunjungan')">🚶 Kunjungan</button>
+      </div>
+
+      <div class="log-box" id="det-log-box">
+        <div style="text-align:center;font-size:11px;color:var(--sub);padding:8px 0;">
+          ⏳ Belum ada reminder terkirim — klik salah satu tombol di atas
+        </div>
+      </div>
+
+      <div id="det-status-section" style="display:none;">
+        <div class="sec-title">Update Respons Debitur <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(opsional)</span></div>
+        <div class="status-opts">
+          <div class="sopt" id="sopt-1" onclick="pickStatus(1)">✅ Berkomitmen<br>akan bayar</div>
+          <div class="sopt" id="sopt-2" onclick="pickStatus(2)">⏳ Minta waktu<br>tambahan</div>
+          <div class="sopt" id="sopt-3" onclick="pickStatus(3)">📵 Tidak bisa<br>dihubungi</div>
+          <div class="sopt" id="sopt-4" onclick="pickStatus(4)">🚨 Perlu<br>eskalasi kunjungan</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="det-submit" onclick="markDone()" style="margin-top:12px;" disabled>Kirim reminder terlebih dahulu</button>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: SBM ====== -->
+  <div class="page" id="page-sbm">
+    <div class="app-header">
+      <div class="header-row-back">
+        <button class="btn-back" onclick="navTo('page-main')">❮</button>
+        <div>
+          <div class="h-title">SME Management Control</div>
+          <div class="h-sub">Supervisi Kepatuhan Berjenjang Unit Kerja</div>
+        </div>
+      </div>
+      <div class="rm-row" style="margin-top:10px;">
+        <div class="rm-chip"><div class="rm-av2">👔</div><div><div class="rm-name">Ahmad Fauzi</div><div class="rm-role">Supervisor SBM</div></div></div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="sbm-kpi">
+        <div class="sbm-kpi-card"><div class="kv red" id="sbm-kritis">4</div><div class="kl">Debitur Kritis Aktif</div></div>
+        <div class="sbm-kpi-card"><div class="kv green" id="sbm-done">1</div><div class="kl">Sudah Diremind</div></div>
+        <div class="sbm-kpi-card"><div class="kv" id="sbm-total">12</div><div class="kl">Total Debitur Kelolaan</div></div>
+        <div class="sbm-kpi-card"><div class="kv" id="sbm-rm">4</div><div class="kl">RM Aktif</div></div>
+      </div>
+
+      <div class="sec-title">Kinerja RM (Klik untuk Detail)</div>
+
+      <div class="coll" id="coll-amel">
+        <div class="coll-h" onclick="togColl('coll-amel')">
+          <div style="flex:1;">
+            <div class="coll-name">Lutfiah Amelia Putri <span style="font-size:10px;color:var(--sub);font-weight:400;">(RM Amel)</span></div>
+            <div class="coll-sub" id="sbm-lbl-amel">Progress: 1 dari 4 Selesai</div>
+            <div class="pbar"><div class="pbar-fill" id="sbm-bar-amel" style="width:25%;background:#EF4444;"></div></div>
+          </div>
+          <span class="coll-arr">▼</span>
+        </div>
+        <div class="coll-body" id="sbm-tasks-amel">
+          <div class="coll-task"><span>🔴 <b>Soleman / Parfum Rahayu Wangi</b> (Rp 12.500.000)</span><span id="sbm-t-soleman" style="color:#EF4444;font-weight:700;font-size:10px;">BELUM</span></div>
+          <div class="coll-task"><span>🔴 <b>CV Maju Jaya Tekstil</b> (Rp 45.000.000)</span><span id="sbm-t-maju" style="color:#EF4444;font-weight:700;font-size:10px;">BELUM</span></div>
+          <div class="coll-task"><span>🔴 <b>Bambang Kusuma</b> (Rp 31.750.000)</span><span id="sbm-t-bambang" style="color:#EF4444;font-weight:700;font-size:10px;">BELUM</span></div>
+          <div class="coll-task"><span>🔴 <b>Maria Lim</b> (Rp 15.900.000)</span><span id="sbm-t-maria" style="color:#059669;font-weight:700;font-size:10px;">✅ SELESAI</span></div>
+        </div>
+      </div>
+
+      <div class="coll" id="coll-andika">
+        <div class="coll-h" onclick="togColl('coll-andika')">
+          <div style="flex:1;">
+            <div class="coll-name">Andika Ramadhan <span style="font-size:10px;color:var(--sub);font-weight:400;">(RM Andika)</span></div>
+            <div class="coll-sub">Progress: 2 dari 6 Selesai</div>
+            <div class="pbar"><div class="pbar-fill" style="width:33%;background:#D97706;"></div></div>
+          </div>
+          <span class="coll-arr">▼</span>
+        </div>
+        <div class="coll-body">
+          <div class="coll-task"><span>🟡 <b>PT Sinar Cahaya</b> (Rp 28.000.000)</span><span style="color:#059669;font-weight:700;font-size:10px;">✅ SELESAI</span></div>
+          <div class="coll-task"><span>🟡 <b>UD Berkah Motor</b> (Rp 15.500.000)</span><span style="color:#059669;font-weight:700;font-size:10px;">✅ SELESAI</span></div>
+          <div class="coll-task"><span>🔴 <b>Rudi Hartono</b> (Rp 22.000.000)</span><span style="color:#EF4444;font-weight:700;font-size:10px;">BELUM</span></div>
+          <div class="coll-task"><span>🔴 <b>CV Delta Abadi</b> (Rp 55.000.000)</span><span style="color:#EF4444;font-weight:700;font-size:10px;">BELUM</span></div>
+        </div>
+      </div>
+
+      <div class="coll" id="coll-sari">
+        <div class="coll-h" onclick="togColl('coll-sari')">
+          <div style="flex:1;">
+            <div class="coll-name">Sari Nuraini <span style="font-size:10px;color:var(--sub);font-weight:400;">(RM Sari)</span></div>
+            <div class="coll-sub" style="color:#059669;">Progress: 5 dari 5 Selesai</div>
+            <div class="pbar"><div class="pbar-fill" style="width:100%;background:#059669;"></div></div>
+          </div>
+          <span class="coll-arr">▼</span>
+        </div>
+        <div class="coll-body">
+          <div class="coll-task"><span>🟢 <b>Semua Debitur</b></span><span style="color:#059669;font-weight:700;font-size:10px;">✅ PATUH</span></div>
+        </div>
+      </div>
+
+      <div class="coll" id="coll-bagas">
+        <div class="coll-h" onclick="togColl('coll-bagas')">
+          <div style="flex:1;">
+            <div class="coll-name">Bagas Firmansyah <span style="font-size:10px;color:var(--sub);font-weight:400;">(RM Bagas)</span></div>
+            <div class="coll-sub" style="color:#059669;">Progress: 3 dari 3 Selesai</div>
+            <div class="pbar"><div class="pbar-fill" style="width:100%;background:#059669;"></div></div>
+          </div>
+          <span class="coll-arr">▼</span>
+        </div>
+        <div class="coll-body">
+          <div class="coll-task"><span>🟢 <b>Semua Debitur</b></span><span style="color:#059669;font-weight:700;font-size:10px;">✅ PATUH</span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="bot-nav">
+      <button class="btn-nav" onclick="navTo('page-main')">❮ Menu RM</button>
+      <span style="font-size:10.5px;color:var(--sub);">Role: <b>Supervisor SBM</b></span>
+    </div>
+  </div>
+
+  <!-- WA MODAL -->
+  <div class="modal-bg" id="wa-modal-bg" onclick="if(event.target===this)closeWA()">
+    <div class="wa-modal">
+      <div class="wa-mh">
+        <div class="wa-mav">🏦</div>
+        <div><div class="wa-mn" id="wm-name">—</div><div class="wa-ms">Official BRI Business API Gateway</div></div>
+      </div>
+      <div class="wa-mb">
+        <div class="wa-bubble" id="wm-msg">—</div>
+        <div class="wa-time">09:41 · terkirim otomatis via gateway</div>
+      </div>
+      <div class="wa-mf">
+        <button class="btn-wac" onclick="closeWA()">Batal</button>
+        <button class="btn-was" onclick="sendWA()">Kirim Sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ====== DATA ====== */
+const DB = [
+  {id:'D001',norek:'0123-01-098765-53-1',cif:'CIF 8810234561',name:'Soleman',usaha:'Parfum Rahayu Wangi',jUsaha:'Perdagangan Eceran – Kosmetik & Parfum',alamat:'Jl. Imam Bonjol No. 45, Cikokol, Tangerang',
+   risk:'r',plafond:'Rp 240.000.000',outstanding:'Rp 227.500.000',amt:'Rp 12.500.000',tempo:'17 Juli 2026',
+   saldo:'Rp 1.200.000',saldoOk:false,delta:'-Rp 11.300.000',deltaOk:false,
+   tags:[{t:'Late-Month Settler (H-3 Closing)',c:'danger'},{t:'Histori Kolektibilitas SML',c:'danger'},{t:'Saldo Tidak Mencukupi',c:'danger'}],
+   plan:[['H-14 Reminder Transaksi','Dorong pengendapan dana usaha','done'],['H-7 Reminder Billing','Konfirmasi kesiapan saldo','next'],['Eskalasi Kunjungan','Jika belum ada komitmen','todo']],done:false},
+  {id:'D002',norek:'0123-01-023456-50-2',cif:'CIF 8810235104',name:'CV Maju Jaya Tekstil',usaha:'CV Maju Jaya Tekstil',jUsaha:'Industri Tekstil & Konveksi – Fasilitas KMK',alamat:'Jl. Veteran Raya No. 12, Karawaci, Tangerang',
+   risk:'r',plafond:'Rp 480.000.000',outstanding:'Rp 451.000.000',amt:'Rp 45.000.000',tempo:'19 Juli 2026',
+   saldo:'Rp 3.400.000',saldoOk:false,delta:'-Rp 41.600.000',deltaOk:false,
+   tags:[{t:'Late-Month Settler (H-3 Closing)',c:'danger'},{t:'Eks-Restrukturisasi',c:'danger'},{t:'Saldo Tidak Mencukupi',c:'danger'}],
+   plan:[['H-14 Reminder Transaksi','Hubungi via WhatsApp','done'],['H-7 Reminder Billing','Telepon konfirmasi','next'],['Eskalasi Kunjungan','Jadwalkan visit lapangan','todo']],done:false},
+  {id:'D003',norek:'0123-01-077712-55-4',cif:'CIF 8810236789',name:'Bambang Kusuma',usaha:'Bengkel Las Karya Mandiri',jUsaha:'Jasa Konstruksi & Pengelasan',alamat:'Jl. Gatot Subroto Km 3, Batuceper, Tangerang',
+   risk:'r',plafond:'Rp 600.000.000',outstanding:'Rp 588.600.000',amt:'Rp 31.750.000',tempo:'21 Juli 2026',
+   saldo:'Rp 850.000',saldoOk:false,delta:'-Rp 30.900.000',deltaOk:false,
+   tags:[{t:'Eks-Restrukturisasi',c:'danger'},{t:'Histori Kolektibilitas SML',c:'danger'},{t:'Saldo Tidak Mencukupi',c:'danger'}],
+   plan:[['H-14 Reminder Transaksi','Belum dijalankan','todo'],['H-7 Reminder Billing','Menunggu tahap sebelumnya','todo'],['Eskalasi Kunjungan','Menunggu','todo']],done:false},
+  {id:'D004',norek:'0123-01-045678-51-7',cif:'CIF 8810237022',name:'Maria Lim',usaha:'Toko Sembako Berkah Lim',jUsaha:'Perdagangan Sembako',alamat:'Jl. Daan Mogot No. 88, Tangerang',
+   risk:'r',plafond:'Rp 150.000.000',outstanding:'Rp 132.000.000',amt:'Rp 15.900.000',tempo:'18 Juli 2026',
+   saldo:'Rp 13.800.000',saldoOk:false,delta:'-Rp 2.100.000',deltaOk:false,
+   tags:[{t:'Late-Month Settler (H-3 Closing)',c:'danger'}],
+   plan:[['H-14 Reminder Transaksi','Sudah dihubungi','done'],['H-7 Reminder Billing','Sudah dihubungi','done'],['Eskalasi Kunjungan','Terjadwal hari ini','next']],done:true},
+  {id:'D005',norek:'0123-01-065412-52-3',cif:'CIF 8810238455',name:'Yusuf Pratama',usaha:'Distro Pratama Style',jUsaha:'Perdagangan Pakaian Jadi',alamat:'Jl. Sudirman No. 21, Tangerang',
+   risk:'y',plafond:'Rp 90.000.000',outstanding:'Rp 75.500.000',amt:'Rp 9.300.000',tempo:'20 Juli 2026',
+   saldo:'Rp 8.100.000',saldoOk:false,delta:'-Rp 1.200.000',deltaOk:false,
+   tags:[{t:'Saldo Tidak Mencukupi',c:'warn'},{t:'Pembayaran Lancar 12 bln',c:'ok'}],
+   plan:[['H-7 Reminder Transaksi','Konfirmasi singkat','next'],['H-3 Reminder Billing','Belum dijalankan','todo']],done:false},
+  {id:'D006',norek:'0123-01-034567-53-9',cif:'CIF 8810239011',name:'Citra Anggraini',usaha:'Salon Citra Beauty',jUsaha:'Jasa Kecantikan & Perawatan',alamat:'Jl. MH Thamrin No. 5, Tangerang',
+   risk:'y',plafond:'Rp 120.000.000',outstanding:'Rp 98.200.000',amt:'Rp 12.450.000',tempo:'22 Juli 2026',
+   saldo:'Rp 16.900.000',saldoOk:true,delta:'+Rp 4.450.000',deltaOk:true,
+   tags:[{t:'Pembayaran Lancar 12 bln',c:'ok'}],
+   plan:[['H-7 Reminder Transaksi','Sudah dihubungi','done'],['H-3 Reminder Billing','Menunggu jadwal','next']],done:false},
+  {id:'D007',norek:'0123-01-019283-54-6',cif:'CIF 8810239872',name:'Dedi Hermawan',usaha:'Warung Makan Hermawan',jUsaha:'Rumah Makan & Katering',alamat:'Jl. Pajajaran No. 67, Tangerang',
+   risk:'y',plafond:'Rp 70.000.000',outstanding:'Rp 58.900.000',amt:'Rp 7.800.000',tempo:'19 Juli 2026',
+   saldo:'Rp 7.200.000',saldoOk:false,delta:'-Rp 600.000',deltaOk:false,
+   tags:[{t:'Saldo Tidak Mencukupi',c:'warn'},{t:'Pembayaran Lancar 12 bln',c:'ok'}],
+   plan:[['H-7 Reminder Transaksi','Belum dijalankan','todo'],['H-3 Reminder Billing','Menunggu','todo']],done:false},
+  {id:'D008',norek:'0123-01-056789-55-2',cif:'CIF 8810240345',name:'Putri Anjani',usaha:'Apotek Anjani Sehat',jUsaha:'Apotek & Perdagangan Farmasi',alamat:'Jl. Ki Hajar Dewantara No. 9, Tangerang',
+   risk:'y',plafond:'Rp 110.000.000',outstanding:'Rp 89.700.000',amt:'Rp 10.200.000',tempo:'23 Juli 2026',
+   saldo:'Rp 14.900.000',saldoOk:true,delta:'+Rp 4.700.000',deltaOk:true,
+   tags:[{t:'Pembayaran Lancar 12 bln',c:'ok'}],
+   plan:[['H-7 Reminder Transaksi','Sudah dihubungi','done'],['H-3 Reminder Billing','Sudah dihubungi','done']],done:true},
+  {id:'D009',norek:'0123-01-088123-56-8',cif:'CIF 8810241129',name:'Fajar Nugroho',usaha:'Bengkel Motor Nugroho Jaya',jUsaha:'Bengkel & Servis Kendaraan',alamat:'Jl. Cikokol Raya No. 14, Tangerang',
+   risk:'y',plafond:'Rp 130.000.000',outstanding:'Rp 109.400.000',amt:'Rp 13.600.000',tempo:'18 Juli 2026',
+   saldo:'Rp 12.700.000',saldoOk:false,delta:'-Rp 900.000',deltaOk:false,
+   tags:[{t:'Saldo Tidak Mencukupi',c:'warn'},{t:'Pembayaran Lancar 12 bln',c:'ok'}],
+   plan:[['H-7 Reminder Transaksi','Belum dijalankan','todo'],['H-3 Reminder Billing','Menunggu','todo']],done:false},
+  {id:'D010',norek:'0123-01-077889-57-3',cif:'CIF 8810242890',name:'Indah Permata',usaha:'Toko Bangunan Permata Jaya',jUsaha:'Perdagangan Material Bangunan',alamat:'Jl. Raya Serpong No. 102, Tangerang',
+   risk:'g',plafond:'Rp 200.000.000',outstanding:'Rp 168.000.000',amt:'Rp 6.400.000',tempo:'25 Juli 2026',
+   saldo:'Rp 38.500.000',saldoOk:true,delta:'+Rp 32.100.000',deltaOk:true,
+   tags:[{t:'Clean Sheet — Aman Optimal',c:'ok'}],
+   plan:[['Pemantauan Sistem','Tidak memerlukan intervensi manual','done']],done:true},
+  {id:'D011',norek:'0123-01-066554-58-1',cif:'CIF 8810243567',name:'Galih Saputra',usaha:'Percetakan Saputra Digital',jUsaha:'Percetakan & Digital Printing',alamat:'Jl. Merdeka No. 30, Tangerang',
+   risk:'g',plafond:'Rp 95.000.000',outstanding:'Rp 71.200.000',amt:'Rp 8.100.000',tempo:'24 Juli 2026',
+   saldo:'Rp 22.300.000',saldoOk:true,delta:'+Rp 14.200.000',deltaOk:true,
+   tags:[{t:'Clean Sheet — Aman Optimal',c:'ok'}],
+   plan:[['Pemantauan Sistem','Tidak memerlukan intervensi manual','done']],done:true},
+  {id:'D012',norek:'0123-01-099887-59-5',cif:'CIF 8810244231',name:'Apotek Sehat Bersama',usaha:'Apotek Sehat Bersama',jUsaha:'Apotek & Perdagangan Farmasi',alamat:'Jl. Kisamaun No. 56, Tangerang',
+   risk:'g',plafond:'Rp 300.000.000',outstanding:'Rp 255.000.000',amt:'Rp 15.000.000',tempo:'16 Juli 2026',
+   saldo:'Rp 45.000.000',saldoOk:true,delta:'+Rp 30.000.000',deltaOk:true,
+   tags:[{t:'Clean Sheet — Aman Optimal',c:'ok'}],
+   plan:[['Pemantauan Sistem','Tidak memerlukan intervensi manual','done']],done:true},
+];
+
+const RMETA={
+  r:{icon:'🔴',title:'Risiko Tinggi',sub:'Saldo tidak cukup ≤ H-14 · Histori Kol-2 / Eks-Restrukturisasi'},
+  y:{icon:'🟡',title:'Risiko Menengah',sub:'Saldo tidak cukup pada rentang H-7 · Pembayaran lancar 12 bulan'},
+  g:{icon:'🟢',title:'Risiko Rendah',sub:'Zona aman — dipantau sistem tanpa intervensi manual'}
+};
+
+let rFilter='all', sFilter='all', selIds=new Set(), currentId=null, waTargetId=null, uploadDone=false;
+
+/* NAV */
+function navTo(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(p).classList.add('active');}
+
+/* BLOCKER */
+function renderBlocker(){
+  const crit=DB.filter(d=>d.risk==='r');
+  document.getElementById('blk-list').innerHTML=crit.map(d=>`
+    <div class="blk-item">
+      <div class="bchk ${d.done?'done':''}">${d.done?'✓':'!'}</div>
+      <div class="bi"><b>${d.usaha}</b><small>${d.norek} · ${d.amt}</small></div>
+      <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${d.done?'rgba(5,150,105,.2)':'rgba(220,38,38,.2)'};color:${d.done?'#6EE7B7':'#FCA5A5'};">${d.done?'✓ Selesai':'Belum'}</span>
+    </div>`).join('');
+  const done=crit.filter(d=>d.done).length;
+  document.getElementById('blk-prog-bar').style.width=(done/crit.length*100)+'%';
+  document.getElementById('blk-prog-lbl').textContent=`${done} / ${crit.length} selesai`;
+  const btn=document.getElementById('btn-blk-cta');
+  if(done===crit.length){btn.textContent='Semua Worklist Kritis Selesai ✓';btn.style.background='#059669';}
+  else{btn.textContent=`Buka Worklist Kritis (${crit.length-done} belum selesai) →`;btn.style.background='';}
+}
+function tryUnlock(){
+  navTo('page-main');
+  renderList();
+  // scroll to top of red list
+  setTimeout(()=>{
+    const first=document.querySelector('.deb-card.r');
+    if(first) first.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 300);
+}
+function closeBlocker(){
+  navTo('page-main');
+  renderList();
+  showToast('🔔 Worklist kritis tetap tersedia di halaman utama');
+}
+
+/* MAIN LIST */
+function toggleRiskFilter(r){
+  rFilter=(rFilter===r)?'all':r;
+  document.querySelectorAll('.mtile').forEach(t=>t.classList.remove('active-r','active-y','active-g'));
+  if(rFilter!=='all') document.getElementById('tile-'+rFilter).classList.add('active-'+rFilter);
+  renderList();
+}
+function setStatusF(s){
+  sFilter=s;
+  document.getElementById('chip-all').classList.toggle('on',s==='all');
+  document.getElementById('chip-pending').classList.toggle('on',s==='pending');
+  document.getElementById('chip-done').classList.toggle('on',s==='done');
+  renderList();
+}
+function getVisible(){
+  let l=DB;
+  if(rFilter!=='all') l=l.filter(d=>d.risk===rFilter);
+  if(sFilter==='pending') l=l.filter(d=>!d.done);
+  if(sFilter==='done') l=l.filter(d=>d.done);
+  const o={r:0,y:1,g:2};
+  return [...l].sort((a,b)=>o[a.risk]-o[b.risk]||(a.done-b.done));
+}
+function renderList(){
+  const list=getVisible();
+  document.getElementById('empty-msg').style.display=list.length?'none':'block';
+  document.getElementById('cnt-r').textContent=DB.filter(d=>d.risk==='r').length;
+  document.getElementById('cnt-y').textContent=DB.filter(d=>d.risk==='y').length;
+  document.getElementById('cnt-g').textContent=DB.filter(d=>d.risk==='g').length;
+  document.getElementById('deb-list').innerHTML=list.map(d=>{
+    const m=RMETA[d.risk];
+    const init=d.usaha.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const chk=selIds.has(d.id)?'checked':'';
+    return `
+    <div class="deb-card ${d.risk} ${d.done?'cleared':''}">
+      <div class="dc-top">
+        <input type="checkbox" class="dc-chk" ${chk} onchange="toggleSel('${d.id}',this.checked)" onclick="event.stopPropagation()">
+        <div class="dc-av">${init}</div>
+        <div class="dc-info" onclick="openDetail('${d.id}')">
+          <div class="dc-name">${d.usaha}</div>
+          <div class="dc-sub">No. Rek: <b>${d.norek}</b><br>${d.cif} · ${d.jUsaha.split('–')[0].trim()}</div>
+        </div>
+        <span class="badge ${d.risk}">${m.icon} ${m.title}</span>
+      </div>
+      <div class="dc-grid" onclick="openDetail('${d.id}')">
+        <div class="dc-metric"><div class="k">Plafond</div><div class="v">${d.plafond}</div></div>
+        <div class="dc-metric"><div class="k">Outstanding</div><div class="v">${d.outstanding}</div></div>
+      </div>
+      <div class="dc-saldo" onclick="openDetail('${d.id}')">
+        <div class="ds-left">
+          <div class="sl">Saldo Simpanan</div>
+          <div class="sv ${d.saldoOk?'ok':'bad'}">${d.saldoOk?'▲':'▼'} ${d.saldo}</div>
+        </div>
+        <div class="ds-right">
+          <div class="dl">Δ thd angsuran</div>
+          <div class="dv ${d.deltaOk?'ok':'bad'}">${d.delta}</div>
+        </div>
+      </div>
+      <div class="dc-pills">${d.tags.map(t=>`<span class="pill ${t.c}">${t.t}</span>`).join('')}</div>
+      <div class="dc-btns">
+        <button class="btn-det" onclick="openDetail('${d.id}')">Lihat Detail</button>
+        <button class="btn-wa ${d.done?'done':''}" onclick="openWAModal('${d.id}')">${d.done?'✓ Terkirim':'💬 Eksekusi WA'}</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('chk-all').checked=list.length>0&&list.every(d=>selIds.has(d.id));
+}
+function toggleSel(id,c){c?selIds.add(id):selIds.delete(id);document.getElementById('chk-all').checked=getVisible().every(d=>selIds.has(d.id));}
+function toggleAll(c){getVisible().forEach(d=>c?selIds.add(d.id):selIds.delete(d.id));renderList();}
+function bulkWA(){
+  const n=getVisible().filter(d=>selIds.has(d.id)).length;
+  if(!n){showToast('⚠️ Pilih minimal satu rekening kredit');return;}
+  showToast(`🚀 Sukses eksekusi ${n} pesan reminder paralel via BRI Business API`);
+}
+
+/* DETAIL */
+function openDetail(id){
+  const d=DB.find(x=>x.id===id); if(!d) return;
+  currentId=id; uploadDone=false;
+  const m=RMETA[d.risk];
+  document.getElementById('det-title').textContent=d.usaha;
+  document.getElementById('det-norek').textContent=d.norek;
+  document.getElementById('det-cif').textContent=d.cif;
+  document.getElementById('det-nama').textContent=d.name;
+  document.getElementById('det-usaha').textContent=d.jUsaha;
+  document.getElementById('det-alamat').textContent=d.alamat;
+  const rb=document.getElementById('det-riskband');
+  rb.className='risk-band '+d.risk;
+  document.getElementById('det-rbic').textContent=m.icon;
+  document.getElementById('det-rbtitle').textContent=m.title;
+  document.getElementById('det-rbsub').textContent=m.sub;
+  document.getElementById('det-plafond').textContent=d.plafond;
+  document.getElementById('det-outstanding').textContent=d.outstanding;
+  document.getElementById('det-amt').textContent=d.amt;
+  document.getElementById('det-tempo').textContent=d.tempo;
+  const sa=document.getElementById('det-saldo');
+  sa.textContent=d.saldo; sa.className='sp-amt '+(d.saldoOk?'ok':'bad');
+  const sp=document.getElementById('det-saldo-pill');
+  sp.textContent=d.saldoOk?'✅ MENCUKUPI':'❌ TIDAK MENCUKUPI';
+  sp.className='sp-pill '+(d.saldoOk?'ok':'bad');
+  document.getElementById('det-delta-lbl').textContent=d.deltaOk?'Kelebihan (Δ) thd angsuran':'Kekurangan (Δ) thd angsuran';
+  const dv=document.getElementById('det-delta-val');
+  dv.textContent=d.delta; dv.className='sp-dv '+(d.deltaOk?'ok':'bad');
+  document.getElementById('det-pills').innerHTML=d.tags.map(t=>`<span class="pill ${t.c}">${t.t}</span>`).join('');
+  document.getElementById('det-timeline').innerHTML=d.plan.map(([t,desc,s])=>`
+    <div class="tl-item">
+      <div class="tl-dot ${s}"></div>
+      <div class="tl-time">${s==='done'?'✓ Selesai':s==='next'?'→ Sedang berjalan':'Menunggu'}</div>
+      <div class="tl-name">${t}</div>
+      <div class="tl-desc">${desc}</div>
+    </div>`).join('');
+  const ub=document.getElementById('det-upload-box');
+  contactLogged=false; selectedStatus=0;
+  document.querySelectorAll('.sopt').forEach(el=>el.className='sopt');
+  const logBox=document.getElementById('det-log-box');
+  const statusSec=document.getElementById('det-status-section');
+  if(d.done){
+    logBox.className='log-box sent';
+    logBox.innerHTML='<div class="log-sent-badge">✅ Log Reminder Tersimpan di Digital Audit Trail</div><div class="log-row"><span class="lk">Status</span><span class="lv" style="color:#059669;">SUDAH DIREMIND</span></div>';
+    statusSec.style.display='none';
+  } else {
+    logBox.className='log-box';
+    logBox.innerHTML='<div style="text-align:center;font-size:11px;color:var(--sub);padding:8px 0;">⏳ Belum ada reminder terkirim — klik salah satu tombol di atas</div>';
+    statusSec.style.display='none';
+  }
+  const btn=document.getElementById('det-submit');
+  if(d.done){btn.textContent='✓ Tersimpan di Digital Audit Trail';btn.disabled=true;btn.className='btn-submit done-btn';}
+  else{btn.textContent='Kirim reminder terlebih dahulu';btn.disabled=true;btn.className='btn-submit';}
+  navTo('page-detail');
+}
+let contactLogged=false, selectedStatus=0;
+
+function getNow(){
+  const n=new Date();
+  return n.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})+' · '+
+    n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB';
+}
+
+function logContact(media){
+  const d=DB.find(x=>x.id===currentId); if(!d) return;
+  contactLogged=true;
+  const mediaLabel={'telepon':'📞 Telepon','whatsapp':'💬 WhatsApp','kunjungan':'🚶 Kunjungan Langsung'};
+  const box=document.getElementById('det-log-box');
+  box.className='log-box sent';
+  box.innerHTML=`
+    <div class="log-sent-badge">✅ Log Reminder Otomatis Tersimpan</div>
+    <div class="log-row"><span class="lk">Waktu Kirim</span><span class="lv">${getNow()}</span></div>
+    <div class="log-row"><span class="lk">Media Kontak</span><span class="lv">${mediaLabel[media]}</span></div>
+    <div class="log-row"><span class="lk">ID Pekerja</span><span class="lv">00401038 — RM Amel</span></div>
+    <div class="log-row"><span class="lk">Debitur</span><span class="lv">${d.norek}</span></div>
+    <div class="log-row"><span class="lk">Status</span><span class="lv" style="color:#059669;">TERKIRIM & TEREKAM</span></div>`;
+  document.getElementById('det-status-section').style.display='block';
+  const btn=document.getElementById('det-submit');
+  btn.disabled=false;
+  btn.className='btn-submit ready';
+  btn.textContent='Selesai & Simpan ke Audit Trail';
+  if(media==='whatsapp') openWAModal(currentId);
+  else showToast(`📋 Log ${mediaLabel[media]} tersimpan otomatis ke Audit Trail`);
+}
+
+const SOPT_STYLE=['','sel-green','sel-yellow','sel-red','sel-blue'];
+function pickStatus(n){
+  selectedStatus=n;
+  document.querySelectorAll('.sopt').forEach((el,i)=>el.className='sopt'+(i+1===n?' '+SOPT_STYLE[n]:''));
+  const labels=['','Berkomitmen bayar','Minta waktu tambahan','Tidak bisa dihubungi','Perlu eskalasi kunjungan'];
+  showToast(`Status dicatat: ${labels[n]}`);
+  if(n===4) showToast('🚨 Flag eskalasi kunjungan akan diteruskan ke SBM');
+}
+
+function markDone(){
+  const d=DB.find(x=>x.id===currentId); if(!d||d.done||!contactLogged) return;
+  d.done=true;
+  const btn=document.getElementById('det-submit');
+  btn.className='btn-submit done-btn';
+  btn.textContent='✓ Tersimpan di Digital Audit Trail';
+  btn.disabled=true;
+  navTo('page-main'); renderList(); renderBlocker();
+  updateSBM(currentId);
+  showToast(`✅ Reminder ${d.usaha} tercatat — SBM diperbarui otomatis`);
+}
+
+/* SBM UPDATE */
+const sbmMap={'D001':'sbm-t-soleman','D002':'sbm-t-maju','D003':'sbm-t-bambang','D004':'sbm-t-maria'};
+function updateSBM(id){
+  const el=document.getElementById(sbmMap[id]); if(!el) return;
+  el.textContent='✅ SELESAI'; el.style.color='#059669';
+  const done=DB.filter(d=>d.risk==='r'&&d.done).length;
+  document.getElementById('sbm-kritis').textContent=DB.filter(d=>d.risk==='r'&&!d.done).length;
+  document.getElementById('sbm-done').textContent=done;
+  const pct=(done/DB.filter(d=>d.risk==='r').length*100).toFixed(0);
+  document.getElementById('sbm-bar-amel').style.width=pct+'%';
+  document.getElementById('sbm-bar-amel').style.background=pct==100?'#059669':pct>=50?'#D97706':'#EF4444';
+  document.getElementById('sbm-lbl-amel').textContent=`Progress: ${done} dari 4 Selesai`;
+}
+
+/* WA MODAL */
+function openWAModal(id){
+  const d=DB.find(x=>x.id===id); if(!d) return;
+  waTargetId=id;
+  document.getElementById('wm-name').textContent=d.usaha;
+  document.getElementById('wm-msg').innerHTML=`Halo Bapak/Ibu <b>${d.name}</b>,<br><br>Mengingatkan kewajiban fasilitas kredit Anda di PT Bank Rakyat Indonesia (Persero), Tbk. yang akan memasuki jatuh tempo pada <b>${d.tempo}</b>.<br><br>Mohon pastikan ketersediaan dana simpanan minimum sebesar <b>${d.amt}</b> guna kelancaran sistem autodebet otomatis.<br><br>Terima kasih.<br><b>BRI BO Tangerang Ahmad Yani</b>`;
+  document.getElementById('wa-modal-bg').classList.add('show');
+}
+function closeWA(){document.getElementById('wa-modal-bg').classList.remove('show');}
+function sendWA(){
+  closeWA();
+  const d=DB.find(x=>x.id===waTargetId);
+  showToast(`🚀 Pesan WA ke ${d?d.usaha:'debitur'} berhasil dikirim via BRI Business API`);
+}
+
+/* COLLAPSIBLE SBM */
+function togColl(id){document.getElementById(id).classList.toggle('open');}
+
+/* TOAST */
+let tt;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg; t.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+renderBlocker(); renderList();
+</script>
+</body>
+</html>
